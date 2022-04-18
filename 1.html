@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title></title>
+		<!-- 注意，在使用电子在线文档时，必须引入。目前 luckysheet没有包，所有得一个一个引入 -->
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+		<link rel='stylesheet' href='./Luckysheet/css/iconfont.css' />
+		<link rel='stylesheet' href='./Luckysheet/css/luckysheet.css' />
+		<link rel='stylesheet' href='./Luckysheet/css/plugins.css' />
+		<link rel='stylesheet' href='./Luckysheet/css/pluginsCss.css' />
+		<link rel="stylesheet" type="text/css" href="" />
+		<script src="./Luckysheet/js/luckysheet.umd.js"></script>
+		<script src="./Luckysheet/js/plugin.js"></script>
+		<!-- FileSaver.js 在没有原生支持 saveAs() 的浏览器上实现了 saveAs() 接口。有一个 FileSaver.js 示例，演示如何保存各种媒体类型。
+		FileSaver.js 是在客户端保存文件的解决方案，非常适合需要生成文件，或者保存不应该发送到外部服务器的敏感信息的 web App。 -->
+		<script src="./js/FileSave.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/luckyexcel@latest/dist/luckyexcel.umd.js"></script>
+		<!--exceljs的引入 -->
+		<script src="https://cdn.jsdelivr.net/npm/exceljs@latest/dist/exceljs.js"></script>
+		<!-- 1页面的js -->
+		<script src="js/1.js"></script>
+		<!-- 引入mockjs的函数 -->
+		<script src="http://mockjs.com/dist/mock.js"></script>
+		<script src="js/mock.js"></script>
+		<style type="text/css">
+			#luckysheet {
+				height: 800px;
+			}
+
+			// 合并打印区域table边框
+			table {
+				border-collapse: collapse;
+			}
+		</style>
+		<style type="text/css" media="print">
+			// 隐藏打印区域按钮
+			.noprint {
+				display: none;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="container">
+			<input id="importExcel_input" type="file" name="file" placeholder="導入" />
+			<button onclick="save()">保存</button>
+			<button id="" class="btn btn-primary"
+				style=" padding:3px 6px; font-size: 16px;width: 100px;height: 27px; margin-right: 85px;"
+				onclick="downExcelData()">導出</button>
+
+			<!--    打印按钮区域-->
+			<div id="button-area">
+				<button id="print-button" onclick="to_print()">打印</button>
+			</div>
+			<!--    打印内容区域，默认不显示，点击打印后才显示-->
+			<div id="print-area" style="display: none;">
+				<div class="noprint">
+					<button id="confirm-button" onclick="print()">确认打印</button>
+				</div>
+				<div id="print-html"></div>
+			</div>
+			<div id="luckysheet"></div>
+		</div>
+		<script type="text/javascript">
+			//监听文件上传
+			var input = document.querySelector('input');
+			input.addEventListener('change', importExcel);
+
+			// 打印方法
+			// 打印时，获取luckysheet指定区域html内容，拼接至div，隐藏luckysheet容器并显示打印区域html
+			function to_print() {
+				const html = luckysheet.getRangeHtml();
+				console.log(html)
+				document.querySelector('#print-html').innerHTML = html;
+				document.querySelector('#print-area').style.display = 'block';
+				document.querySelector('#button-area').style.display = 'none';
+				document.querySelector('#luckysheet').style.display = 'none';
+			}
+		</script>
+	</body>
+</html>

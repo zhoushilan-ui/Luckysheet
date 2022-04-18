@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title></title>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+		<link rel='stylesheet' href='./Luckysheet/css/iconfont.css' />
+		<link rel='stylesheet' href='./Luckysheet/css/luckysheet.css' />
+		<link rel='stylesheet' href='./Luckysheet/css/plugins.css' />
+		<link rel='stylesheet' href='./Luckysheet/css/pluginsCss.css' />
+		<script src="./Luckysheet/js/luckysheet.umd.js"></script>
+		<script src="./Luckysheet/js/plugin.js"></script>
+		<script src="./Luckysheet/js/luckyexcel.umd.js" type="text/javascript" charset="utf-8"></script>
+		<!-- 使用excelJS实现json文件转excel文件 -->
+		<!-- <script src="https://cdn.jsdelivr.net/npm/exceljs@latest/dist/exceljs.js"></script>
+		<script src="https://cdn.bootcdn.net/ajax/libs/xlsx/0.16.2/xlsx.full.min.js"></script> -->
+		<!-- <script src="https://cdn.jsdelivr.net/npm/luckyexcel@latest/dist/luckyexcel.umd.js"></script> -->
+	</head>
+	<body>
+		<div>
+			<div style="float: left;">
+				<button onclick="load()">加载</button>
+				<button onclick="save()">保存</button>
+			</div>
+			<div style="float: right;">
+				<input style="font-size:16px;" type="file" id="Luckyexcel-demo-file" name="Luckyexcel-demo-file"
+					change="demoHandler" />
+				<button onclick=""> 导入 </button>
+				<button> 另存为 </button>
+			</div>
+		</div>
+		<div id="luckysheet"
+			style="margin:0px;padding:0px;position:absolute;width:100%;left: 0px;top: 50px;bottom: 0px;">
+		</div>
+		<script type="text/javascript">
+			$(function() {
+				//Configuration item
+				var options = {
+					container: 'luckysheet', // 设定DOM容器的id
+					title: '', // 设定表格名称
+					lang: 'zh', // 设定表格语言
+					showinfobar: false,
+
+				}
+
+				luckysheet.create(options)
+			})
+			// var server = {
+			// 	ws: null,
+			// 	callbacks: {}, //消息回调函数
+			// 	init() {
+			// 		this.ws = new WebSocket("ws://127.0.0.1:11551?uname=test&pwd=123456");
+			// 		var _ws = this.ws;
+			// 		var _this = this;
+			// 		_ws.onopen = function() {
+			// 			console.log("ws 连接成功!")
+			// 			//保持连接
+			// 			setInterval(function() {
+			// 				_ws.send('ping')
+			// 			}, 1000 * 60)
+			// 		}
+
+			// 		_ws.onmessage = function(msg) {
+			// 			msg = msg.data
+			// 			console.log('<==')
+			// 			console.log(msg)
+			// 			if ('pong' == msg || '1' == msg) {
+			// 				return
+			// 			}
+
+			// 			var msgObj = JSON.parse(msg)
+			// 			var callback = _this.callbacks[msgObj.id]
+			// 			if (callback) {
+			// 				callback(msgObj.data)
+			// 			} else {
+			// 				console.log("未处理消息 msg = " + msg)
+			// 			}
+			// 		}
+
+			// 		_ws.onerror = function(e) {
+			// 			console.warn("连接出错")
+			// 			console.warn(e)
+			// 			_ws.close()
+			// 		}
+
+			// 		_ws.onclose = function() {
+			// 			console.warn("连接断开")
+			// 			//setTimeout(function(){
+			// 			//    _this.init()
+			// 			//},1000)
+			// 		}
+			// 	},
+			// 	get(callback) {
+			// 		var id = "id_" + Math.random()
+			// 		this.callbacks[id] = callback
+
+			// 		this.send({
+			// 			action: 'get',
+			// 			id: id,
+			// 		})
+			// 	},
+			// 	send(msgObj) {
+			// 		var msg = JSON.stringify(msgObj);
+			// 		this.ws.send(msg)
+			// 		console.log("==>")
+			// 		console.log(msg)
+			// 	},
+			// 	set(opt, callback) {
+			// 		var id = "id_" + Math.random()
+			// 		this.callbacks[id] = callback
+
+			// 		this.send({
+			// 			action: 'set',
+			// 			id: id,
+			// 			data: opt,
+			// 		})
+			// 	}
+			// }
+			// server.init()
+
+
+			/** 加载表格 */
+			function load() {
+				server.get(function(options) {
+					luckysheet.destroy()
+					luckysheet.create(JSON.parse(options))
+					console.log("init...")
+				})
+			}
+
+			/** 保存表格 */
+			function save() {
+				var options = {
+					title: 'TD游戏配置',
+					lang: 'zh',
+					container: 'luckysheet',
+					showinfobar: false,
+					data: [],
+				}
+
+				var luckysheetfile = luckysheet.getLuckysheetfile()
+				if (!luckysheetfile) return;
+
+				for (const index in luckysheetfile) {
+					var sheet = luckysheetfile[index]
+					options.data[index] = {
+						name: sheet.name,
+						index: index,
+						column: sheet.data[0].length,
+						row: sheet.data.length,
+					}
+
+					options.data[index].celldata = []
+					var i = 0;
+					for (const r in sheet.data) {
+						for (const c in sheet.data[r]) {
+							options.data[index].celldata[i++] = {
+								r: r,
+								c: c,
+								v: sheet.data[r][c]
+							}
+						}
+					}
+				}
+
+				console.log(JSON.stringify(options))
+
+				// server.set(JSON.stringify(options), function() {
+				// 	console.log("同步成功")
+				// })
+			}
+
+
+			function demoHandler() {
+				let upload = document.getElementById("Luckyexcel-demo-file");
+				let selectADemo = document.getElementById("Luckyexcel-select-demo");
+				let downlodDemo = document.getElementById("Luckyexcel-downlod-file");
+				let mask = document.getElementById("lucky-mask-demo");
+				if (upload) {
+
+					window.onload = () => {
+
+						upload.addEventListener("change", function(evt) {
+							var files = evt.target.files;
+							if (files == null || files.length == 0) {
+								alert("No files wait for import");
+								return;
+							}
+
+							let name = files[0].name;
+							let suffixArr = name.split("."),
+								suffix = suffixArr[suffixArr.length - 1];
+							if (suffix != "xlsx") {
+								alert("Currently only supports the import of xlsx files");
+								return;
+							}
+							LuckyExcel.transformExcelToLucky(files[0], function(exportJson, luckysheetfile) {
+
+								if (exportJson.sheets == null || exportJson.sheets.length == 0) {
+									alert(
+										"Failed to read the content of the excel file, currently does not support xls files!"
+									);
+									return;
+								}
+								console.log(exportJson, luckysheetfile);
+								window.luckysheet.destroy();
+
+								window.luckysheet.create({
+									container: 'luckysheet', //luckysheet is the container id
+									showinfobar: false,
+									lang: 'zh',
+									data: exportJson.sheets,
+									title: exportJson.info.name,
+									userInfo: exportJson.info.name.creator
+								});
+							});
+						});
+
+						selectADemo.addEventListener("change", function(evt) {
+							var obj = selectADemo;
+							var index = obj.selectedIndex;
+							var value = obj.options[index].value;
+							var name = obj.options[index].innerHTML;
+							if (value == "") {
+								return;
+							}
+							mask.style.display = "flex";
+							LuckyExcel.transformExcelToLuckyByUrl(value, name, function(exportJson, luckysheetfile) {
+
+								if (exportJson.sheets == null || exportJson.sheets.length == 0) {
+									alert(
+										"Failed to read the content of the excel file, currently does not support xls files!"
+									);
+									return;
+								}
+								console.log(exportJson, luckysheetfile);
+								mask.style.display = "none";
+								window.luckysheet.destroy();
+
+								window.luckysheet.create({
+									container: 'luckysheet', //luckysheet is the container id
+									lang: 'zh',
+									showinfobar: false,
+									data: exportJson.sheets,
+									title: exportJson.info.name,
+									userInfo: exportJson.info.name.creator
+								});
+							});
+						});
+
+						downlodDemo.addEventListener("click", function(evt) {
+							var obj = selectADemo;
+							var index = obj.selectedIndex;
+							var value = obj.options[index].value;
+
+							if (value.length == 0) {
+								alert("Please select a demo file");
+								return;
+							}
+
+							var elemIF = document.getElementById("Lucky-download-frame");
+							if (elemIF == null) {
+								elemIF = document.createElement("iframe");
+								elemIF.style.display = "none";
+								elemIF.id = "Lucky-download-frame";
+								document.body.appendChild(elemIF);
+							}
+							elemIF.src = value;
+						});
+					}
+				}
+			}
+			// demoHandler();
+		</script>
+	</body>
+</html>
